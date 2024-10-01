@@ -1,2 +1,5 @@
 APIs
+Juju
+Observability
 OAI
+Terraform

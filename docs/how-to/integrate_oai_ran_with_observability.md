@@ -20,7 +20,7 @@ Make sure your Kubernetes cluster is capable of handling the load from both Char
 
 This option allows deploying COS and integrating it with Charmed OAI RAN as a Day 1 operation.
 
-To deploy and integrate COS together with a chosen Charmed OAI RAN subsystem, set the following configuration variables in your TF module file:
+To deploy and integrate COS together with a chosen Charmed OAI RAN subsystem, set the following configuration variables in your Terraform module file:
 
 ```console
 deploy_cos     = true
@@ -53,7 +53,7 @@ terraform apply -auto-approve
 
 This option allows deploying COS and integrating it with the existing Charmed OAI RAN deployment (a Day 2 operation).
 
-To deploy and integrate COS with the existing Charmed OAI RAN deployment edit the TF module file used to deploy a chosen Charmed OAI RAN subsystem and add the following configuration variables:
+To deploy and integrate COS with the existing Charmed OAI RAN deployment edit the Terraform module file used to deploy a chosen Charmed OAI RAN subsystem and add the following configuration variables:
 
 ```console
 deploy_cos     = true
@@ -96,7 +96,7 @@ To use this option following conditions need to be met:
 - Loki's `logging` cross-model integration offer created
 ```
 
-To integrate a chosen Charmed OAI RAN subsystem with an existing COS deployment, set the following configuration variables in your TF module file:
+To integrate a chosen Charmed OAI RAN subsystem with an existing COS deployment, set the following configuration variables in your Terraform module file:
 
 ```console
 use_existing_cos                  = true
