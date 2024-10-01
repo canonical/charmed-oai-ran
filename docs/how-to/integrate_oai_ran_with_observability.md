@@ -125,4 +125,4 @@ Apply the changes:
 terraform apply -auto-approve
 ```
 
-[Charmed OAI RAN Terraform modules]: https://github.com/canonical/terraform-juju-oai-ran
+[Charmed OAI RAN Terraform modules]: https://github.com/canonical/terraform-juju-oai-ran-k8s
