@@ -304,7 +304,7 @@ Update Juju Terraform provider:
 terraform init
 ```
 
-Deploy the gNB simulator:
+Deploy CU:
 
 ```console
 terraform apply -auto-approve
@@ -403,7 +403,7 @@ Update Juju Terraform provider:
 terraform init
 ```
 
-Deploy the gNB simulator:
+Deploy DU:
 
 ```console
 terraform apply -auto-approve
@@ -450,7 +450,7 @@ Update Juju Terraform provider:
 terraform init
 ```
 
-Deploy the gNB simulator:
+Deploy the UE simulator:
 
 ```console
 terraform apply -auto-approve
