@@ -1,4 +1,6 @@
 APIs
+Grafana
+integrations
 Juju
 Kubernetes
 Observability
