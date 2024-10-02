@@ -1,128 +1,131 @@
 # Integrate Charmed OAI RAN with Canonical Observability Stack
 
-[Charmed OAI RAN Terraform modules][Charmed OAI RAN Terraform modules] come with built-in support for the Canonical Observability Stack (COS).
-By default, COS deployment and integration is disabled.
+One of the key aspects considered while developing Charmed OAI RAN was making it easily observable.
+To achieve this, each [Charmed OAI RAN Terraform module][Charmed OAI RAN Terraform modules] includes Grafana Agent application, which allows for integration with the Canonical Observability Stack (COS).
 
-Each Charmed OAI RAN module exposes a set of configuration variables for deploying and integrating COS.
+This how-to guide outlines the process of integrating Charmed OAI RAN with COS.
 
-This guide covers three ways of integrating Charmed OAI RAN with COS:
-1. [Integrating Charmed OAI RAN with COS at the deployment stage](#option-1)
-2. [Adding COS to an existing Charmed OAI RAN deployment](#option-2)
-3. [Integrating Charmed OAI RAN with an existing COS deployment](#option-3)
+Steps described in this guide can be performed as both Day 1 and Day 2 operations.
 
 ```{note}
 Deploying Canonical Observability Stack will increase the resources consumption on the K8s cluster. 
 Make sure your Kubernetes cluster is capable of handling the load from both Charmed OAI RAN and COS before proceeding.  
 ```
 
-(option-1)=
-## Integrating Charmed OAI RAN with COS at the deployment stage
+## 1. Add COS to the solution Terraform module
 
-This option allows deploying COS and integrating it with Charmed OAI RAN as a Day 1 operation.
-
-To deploy and integrate COS together with a chosen Charmed OAI RAN subsystem, set the following configuration variables in your Terraform module file:
-
-```console
-deploy_cos     = true
-cos_model_name = "YOUR_CUSTOM_COS_MODEL_NAME" (Optional. Defaults to `cos-lite`.)
-```
-
-Example:
+Update your solution Terraform module (here it's named `main.tf`):
 
 ```console
 cat << EOF > main.tf
-module "oai-ran" {
-  source = "git::https://github.com/canonical/terraform-juju-oai-ran//modules/oai-ran-k8s"
-  (...)
-  deploy_cos     = true
-  cos_model_name = "my-cos"
-  (...)
+module "cos" {
+  source                   = git::https://github.com/canonical/terraform-juju-sdcore//modules/external/cos-lite
+  model_name               = "cos-lite"
+  deploy_cos_configuration = true
+  cos_configuration_config = {
+    git_repo                = "https://github.com/canonical/sdcore-cos-configuration"
+    git_branch              = "main"
+    grafana_dashboards_path = "grafana_dashboards/sdcore/"
+  }
+}
+
+resource "juju_integration" "prometheus-remote-write" {
+  model = "YOUR_CHARMED_OAI_RAN_MODEL_NAME"
+
+  application {
+    name     = module.oai-ran.grafana_agent_app_name
+    endpoint = module.oai-ran.send_remote_write_endpoint
+  }
+
+  application {
+    offer_url = module.cos.prometheus_remote_write_offer_url
+  }
+}
+
+resource "juju_integration" "loki-logging" {
+  model = "YOUR_CHARMED_OAI_RAN_MODEL_NAME"
+
+  application {
+    name     = module.oai-ran.grafana_agent_app_name
+    endpoint = module.oai-ran.logging_consumer_endpoint
+  }
+
+  application {
+    offer_url = module.cos.loki_logging_offer_url
+  }
 }
 
 EOF
 ```
 
-Apply the changes:
-
-```console
-terraform apply -auto-approve
-```
-
-(option-2)=
-## Adding COS to an existing Charmed OAI RAN deployment
-
-This option allows deploying COS and integrating it with the existing Charmed OAI RAN deployment (a Day 2 operation).
-
-To deploy and integrate COS with the existing Charmed OAI RAN deployment edit the Terraform module file used to deploy a chosen Charmed OAI RAN subsystem and add the following configuration variables:
-
-```console
-deploy_cos     = true
-cos_model_name = "YOUR_CUSTOM_COS_MODEL_NAME" (Optional. Defaults to `cos-lite`.)
-```
-
-Example:
-
-```console
-vim my-deployment-module.tf
-```
-
-```console
-(...)
-module "oai-ran-cu" {
-  source = "git::https://github.com/canonical/terraform-juju-oai-ran//modules/oai-ran-cu-k8s"
-  (...)
-  deploy_cos     = true
-  cos_model_name = "my-cos"
-  (...)
-}
-(...)
-```
-
-Apply the changes:
-
-```console
-terraform apply -auto-approve
-```
-
-(option-3)=
-## Integrating Charmed OAI RAN with an existing COS deployment
-
-This option allows integrating Charmed OAI RAN with an existing COS deployment. It can be used as both Day 1 and Day 2 operation.
-
 ```{note}
-To use this option following conditions need to be met:
-- Canonical Observability Stack deployed to a Juju model
-- Prometheus's `remote-write` cross-model integration offer created
-- Loki's `logging` cross-model integration offer created
+In this guide it is assumed, that the Terraform module responsible for deploying Charmed OAI RAN is named `oai-ran`.
+If you use different name, please make sure it's reflected in COS integrations.
 ```
 
-To integrate a chosen Charmed OAI RAN subsystem with an existing COS deployment, set the following configuration variables in your Terraform module file:
+## 2. Apply the changes
+
+Fetch COS module:
 
 ```console
-use_existing_cos                  = true
-cos_model_name                    = "YOUR_CUSTOM_COS_MODEL_NAME" (Optional. Defaults to `cos-lite`.)
-prometheus_remote_write_offer_url = "CROSS_MODEL_INTEGRATION_OFFER_URL" (The URL is typicall formatter as follows: [<controller name>:][<model owner>/]<model name>.<application name>)
-loki_logging_offer_url            = "CROSS_MODEL_INTEGRATION_OFFER_URL" (The URL is typicall formatter as follows: [<controller name>:][<model owner>/]<model name>.<application name>)
+terraform init
 ```
 
-Example:
-
-```console
-module "oai-ran-du" {
-  source = "git::https://github.com/canonical/terraform-juju-oai-ran//modules/oai-ran-du-k8s"
-  (...)
-  use_existing_cos                  = true
-  cos_model_name                    = "my-existing-cos"
-  prometheus_remote_write_offer_url = "admin/my-existing-cos.prometheus"
-  loki_logging_offer_url            = "admin/my-existing-cos.loki"
-  (...)
-}
-```
-
-Apply the changes:
+Apply new configuration:
 
 ```console
 terraform apply -auto-approve
+```
+
+## 3. Example of a complete solution Terraform module including Charmed OAI RAN integrated with COS
+
+```console
+resource "juju_model" "ran" {
+  name  = "charmed-oai-ran"
+}
+
+module "oai-ran" {
+  source                   = "git::https://github.com/canonical/terraform-juju-oai-ran-k8s//modules/oai-ran-k8s"
+  model_name               = juju_model.ran.name
+  create_model             = false
+}
+
+module "cos" {
+  source                   = "git::https://github.com/canonical/terraform-juju-sdcore//modules/external/cos-lite"
+  model_name               = "cos-lite"
+  deploy_cos_configuration = true
+  cos_configuration_config = {
+    git_repo                = "https://github.com/canonical/sdcore-cos-configuration"
+    git_branch              = "main"
+    grafana_dashboards_path = "grafana_dashboards/sdcore/"
+  }
+}
+
+resource "juju_integration" "prometheus-remote-write" {
+  model = juju_model.ran.name
+
+  application {
+    name     = module.oai-ran.grafana_agent_app_name
+    endpoint = module.oai-ran.send_remote_write_endpoint
+  }
+
+  application {
+    offer_url = module.cos.prometheus_remote_write_offer_url
+  }
+}
+
+resource "juju_integration" "loki-logging" {
+  model = juju_model.ran.name
+
+  application {
+    name     = module.oai-ran.grafana_agent_app_name
+    endpoint = module.oai-ran.logging_consumer_endpoint
+  }
+
+  application {
+    offer_url = module.cos.loki_logging_offer_url
+  }
+}
 ```
 
 [Charmed OAI RAN Terraform modules]: https://github.com/canonical/terraform-juju-oai-ran-k8s
