@@ -1,5 +1,6 @@
 addon
 addons
+disaggregated
 gNB
 gNodeB
 hostname
@@ -17,6 +18,7 @@ MCC
 MNC
 NMS
 Observability
+observability
 OAI
 OPC
 Ryzen
