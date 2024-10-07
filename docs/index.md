@@ -1,6 +1,12 @@
 # Charmed OAI RAN
 
-Placeholder
+OAI RAN is an open source 5G radio network distributed by the Open Air Interface Software Alliance.
+
+OAI RAN addresses the need for a cost-effective open source 5G radio network, as opposed to traditionally costly mobile networking software. It supports various configurations, including standalone and non-standalone modes, and can be deployed in a variety of environments, from private networks to public networks.
+
+A 5G radio network consists of a Centralized Unit (CU), a Distributed Unit (DU), and a Radio Unit (RU), each with its own set of configurations and service interfaces. Charmed OAI RAN makes it easy to operate the CU and DU components from day 1 to day N, with full automation and observability. It integrates seamlessly with [Charmed Aether SD-Core](https://canonical-charmed-aether-sd-core.readthedocs-hosted.com/en/latest/), Canonical's 5G core network solution, to provide a complete 5G network solution.
+
+Charmed OAI RAN is for private mobile networks. It offers a cost-effective and easy-to-use radio networking solution for any enterprise that needs on-site 5G mobile network connectivity for their devices and personnel. It is also the ideal open source distribution for any technology enthusiast who would like to deploy and test a 5G mobile network for their own connectivity needs. Use it in your farm, mine or oil rig, wherever you need 5G connectivity.
 
 ## In this documentation
 
