@@ -17,6 +17,7 @@ MicroK
 MCC
 MNC
 NMS
+observability
 Observability
 observability
 OAI
