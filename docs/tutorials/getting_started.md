@@ -94,7 +94,7 @@ Inside newly created `terraform` directory create a `terraform.tf` file:
 
 ```console
 cd terraform
-cat << EOF > terraform.tf
+cat << EOF > versions.tf
 terraform {
   required_providers {
     juju = {
@@ -110,28 +110,26 @@ Create a Terraform module containing the Charmed Aether SD-Core and a router:
 
 ```console
 cat << EOF > main.tf
-resource "juju_model" "private5g" {
-  name = "private5g"
+resource "juju_model" "sdcore" {
+  name = "sdcore"
 }
 
 module "sdcore-router" {
   source = "git::https://github.com/canonical/sdcore-router-k8s-operator//terraform"
 
-  model_name = juju_model.private5g.name
-  depends_on = [juju_model.private5g]
+  model      = juju_model.sdcore.name
+  depends_on = [juju_model.sdcore]
 }
 
 module "sdcore" {
   source = "git::https://github.com/canonical/terraform-juju-sdcore//modules/sdcore-k8s"
 
-  model_name = juju_model.private5g.name
-  create_model = false
+  model        = juju_model.sdcore.name
+  depends_on = [module.sdcore-router]
 
   traefik_config = {
     routing_mode = "subdomain"
   }
-
-  depends_on = [module.sdcore-router]
 }
 
 EOF
@@ -156,12 +154,12 @@ Deploy SD-Core by applying your Terraform configuration:
 terraform apply -auto-approve
 ```
 
-The deployment process should take approximately 10 minutes.
+The deployment process should take approximately 10-15 minutes.
 
 Monitor the status of the deployment:
 
 ```console
-juju switch private5g
+juju switch sdcore
 watch -n 1 -c juju status --color --relations
 ```
 
@@ -174,7 +172,7 @@ Example:
 ```console
 ubuntu@host:~$ juju status
 Model      Controller                  Cloud/Region                Version  SLA          Timestamp
-private5g  microk8s-classic-localhost  microk8s-classic/localhost  3.4.5    unsupported  08:08:50Z
+sdcore     microk8s-classic-localhost  microk8s-classic/localhost  3.4.5    unsupported  08:08:50Z
 
 App                       Version  Status   Scale  Charm                     Channel        Rev  Address         Exposed  Message
 amf                       1.4.4    active       1  sdcore-amf-k8s            1.5/edge       707  10.152.183.176  no       
@@ -216,13 +214,13 @@ upf/0*                       active    idle   10.1.10.169
 Get the external IP address of Traefik's `traefik-lb` LoadBalancer service:
 
 ```console
-microk8s.kubectl -n private5g get svc | grep "traefik-lb"
+microk8s.kubectl -n sdcore get svc | grep "traefik-lb"
 ```
 
 The output should look similar to below:
 
 ```console
-ubuntu@host:~/terraform$ microk8s.kubectl -n private5g get svc | grep "traefik-lb"
+ubuntu@host:~/terraform$ microk8s.kubectl -n sdcore get svc | grep "traefik-lb"
 traefik-lb                           LoadBalancer   10.152.183.142   10.0.0.2      80:32435/TCP,443:32483/TCP    11m
 ```
 
@@ -258,40 +256,48 @@ juju resolve traefik/0
 
 ## 2. Deploy Charmed OAI RAN CU
 
-Add Charmed OAI RAN CU Terraform module to `main.tf`:
+Create a Terraform module for the Radio Access Network and add Charmed OAI RAN CU to it:
 
 ```console
-cat << EOF >> main.tf
+cat << EOF > ran.tf
+resource "juju_model" "oai-ran" {
+  name = "ran"
+}
+
 module "cu" {
   source = "git::https://github.com/canonical/oai-ran-cu-k8s-operator//terraform"
 
-  model_name = juju_model.private5g.name
+  model_name = juju_model.oai-ran.name
   config     = {
     "n3-interface-name": "ran"
   }
 }
 
+resource "juju_offer" "cu-fiveg-gnb-identity" {
+  model            = juju_model.oai-ran.name
+  application_name = module.cu.app_name
+  endpoint         = module.cu.fiveg_gnb_identity_endpoint
+}
+
 resource "juju_integration" "cu-amf" {
-  model = juju_model.private5g.name
+  model = juju_model.oai-ran.name
   application {
     name     = module.cu.app_name
     endpoint = module.cu.fiveg_n2_endpoint
   }
   application {
-    name     = module.sdcore.amf_app_name
-    endpoint = module.sdcore.fiveg_n2_endpoint
+    offer_url = module.sdcore.amf_fiveg_n2_offer_url
   }
 }
 
 resource "juju_integration" "cu-nms" {
-  model = juju_model.private5g.name
-  application {
-    name     = module.cu.app_name
-    endpoint = module.cu.fiveg_gnb_identity_endpoint
-  }
+  model = juju_model.sdcore.name
   application {
     name     = module.sdcore.nms_app_name
     endpoint = module.sdcore.fiveg_gnb_identity_endpoint
+  }
+  application {
+    offer_url = juju_offer.cu-fiveg-gnb-identity.url
   }
 }
 
@@ -313,6 +319,7 @@ terraform apply -auto-approve
 Monitor the status of the deployment:
 
 ```console
+juju switch ran
 juju status --watch 1s --relations
 ```
 
@@ -323,10 +330,11 @@ The deployment is ready when the `cu` application is in the `active/idle` state.
 Retrieve the NMS address:
 
 ```console
+juju switch sdcore
 juju run traefik/0 show-proxied-endpoints
 ```
 
-The output should be `http://private5g-nms.10.0.0.2.nip.io/`.<br>
+The output should be `http://sdcore-nms.10.0.0.2.nip.io/`.<br>
 Navigate to this address in your browser.
 
 In the Network Management System (NMS), create a network slice with the following attributes:
@@ -364,26 +372,26 @@ You should see the following subscriber created:
 Due to current limitations in the network configuration procedure, it is required to restart the CU Pod after configuring the network.
 This limitation will be addressed in the future.
 To restart the CU Pod execute:
-`microk8s.kubectl -n private5g delete pod cu-0`
+`microk8s.kubectl -n ran delete pod cu-0`
 ```
 
 ## 4. Deploy Charmed OAI RAN DU
 
-Add Charmed OAI RAN DU Terraform module to `main.tf`:
+Add Charmed OAI RAN DU Terraform module to `ran.tf`:
 
 ```console
-cat << EOF >> main.tf
+cat << EOF >> ran.tf
 module "du" {
   source = "git::https://github.com/canonical/oai-ran-du-k8s-operator//terraform"
 
-  model_name = juju_model.private5g.name
+  model_name = juju_model.oai-ran.name
   config     = {
     "simulation-mode": true
   }
 }
 
 resource "juju_integration" "du-cu" {
-  model = juju_model.private5g.name
+  model = juju_model.oai-ran.name
   application {
     name     = module.du.app_name
     endpoint = module.du.fiveg_f1_endpoint
@@ -412,6 +420,7 @@ terraform apply -auto-approve
 Monitor the status of the deployment:
 
 ```console
+juju switch ran
 juju status --watch 1s --relations
 ```
 
@@ -419,18 +428,18 @@ The deployment is ready when the `du` application is in the `active/idle` state.
 
 ## 5. Deploy Charmed OAI RAN UE Simulator
 
-Add Charmed OAI RAN UE Terraform module to `main.tf`:
+Add Charmed OAI RAN UE Terraform module to `ran.tf`:
 
 ```console
-cat << EOF >> main.tf
+cat << EOF >> ran.tf
 module "ue" {
   source = "git::https://github.com/canonical/oai-ran-ue-k8s-operator//terraform"
 
-  model_name = juju_model.private5g.name
+  model_name = juju_model.oai-ran.name
 }
 
 resource "juju_integration" "ue-du" {
-  model = juju_model.private5g.name
+  model = juju_model.oai-ran.name
   application {
     name     = module.ue.app_name
     endpoint = module.ue.fiveg_rfsim_endpoint
