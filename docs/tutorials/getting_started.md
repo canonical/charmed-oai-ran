@@ -203,7 +203,7 @@ pcf/0*                       active    idle   10.1.10.146
 router/0*                    active    idle   10.1.10.145         
 self-signed-certificates/0*  active    idle   10.1.10.141         
 smf/0*                       active    idle   10.1.10.154         
-traefik/0*                   error     idle   10.1.10.160         hook failed: "certificates-relation-changed"
+traefik/0*                   error     idle   10.1.10.160         hook failed: "ingress-relation-created"
 udm/0*                       active    idle   10.1.10.187         
 udr/0*                       active    idle   10.1.10.176         
 upf/0*                       active    idle   10.1.10.169
