@@ -23,7 +23,7 @@ To complete this tutorial, you will need a machine which meets the following req
 From your terminal, install MicroK8s:
 
 ```console
-sudo snap install microk8s --channel=1.29/stable --classic
+sudo snap install microk8s --channel=1.31/stable --classic
 ```
 
 Add your user to the `microk8s` group:
@@ -59,7 +59,7 @@ microk8s config > ~/.kube/config
 From your terminal, install Juju:
 
 ```console
-sudo snap install juju --channel=3.4/stable
+sudo snap install juju --channel=3.6/stable
 ```
 
 Add MicroK8s cluster to Juju:
@@ -172,24 +172,24 @@ Example:
 ```console
 ubuntu@host:~$ juju status
 Model      Controller                  Cloud/Region                Version  SLA          Timestamp
-sdcore     microk8s-classic-localhost  microk8s-classic/localhost  3.4.5    unsupported  08:08:50Z
+sdcore     microk8s-classic-localhost  microk8s-classic/localhost  3.6.0   unsupported  08:08:50Z
 
 App                       Version  Status   Scale  Charm                     Channel        Rev  Address         Exposed  Message
-amf                       1.4.4    active       1  sdcore-amf-k8s            1.5/edge       707  10.152.183.176  no       
-ausf                      1.4.2    active       1  sdcore-ausf-k8s           1.5/edge       520  10.152.183.65   no       
-grafana-agent             0.32.1   waiting      1  grafana-agent-k8s         latest/stable   45  10.152.183.221  no       installing agent
-mongodb                            active       1  mongodb-k8s               6/beta          38  10.152.183.92   no       Primary
-nms                       1.0.0    active       1  sdcore-nms-k8s            1.5/edge       580  10.152.183.141  no       
-nrf                       1.4.1    active       1  sdcore-nrf-k8s            1.5/edge       580  10.152.183.130  no       
-nssf                      1.4.1    active       1  sdcore-nssf-k8s           1.5/edge       462  10.152.183.62   no       
-pcf                       1.4.3    active       1  sdcore-pcf-k8s            1.5/edge       512  10.152.183.144  no       
-router                             active       1  sdcore-router-k8s         1.5/edge       341  10.152.183.218  no       
+amf                       1.5.1    active       1  sdcore-amf-k8s            1.5/stable     834  10.152.183.176  no       
+ausf                      1.5.1    active       1  sdcore-ausf-k8s           1.5/stable     645  10.152.183.65   no       
+grafana-agent             0.32.1   waiting      1  grafana-agent-k8s         latest/stable  45   10.152.183.221  no       installing agent
+mongodb                            active       1  mongodb-k8s               6/stable       61   10.152.183.92   no       Primary
+nms                       1.0.0    active       1  sdcore-nms-k8s            1.5/stable     741  10.152.183.141  no       
+nrf                       1.5.2    active       1  sdcore-nrf-k8s            1.5/stable     720  10.152.183.130  no       
+nssf                      1.5.1    active       1  sdcore-nssf-k8s           1.5/stable     614  10.152.183.62   no       
+pcf                       1.5.2    active       1  sdcore-pcf-k8s            1.5/stable     650  10.152.183.144  no       
+router                             active       1  sdcore-router-k8s         1.5/stable     424  10.152.183.218  no       
 self-signed-certificates           active       1  self-signed-certificates  latest/stable  155  10.152.183.33   no       
-smf                       1.5.2    active       1  sdcore-smf-k8s            1.5/edge       590  10.152.183.64   no       
-traefik                   v2.11.0  waiting      1  traefik-k8s               latest/stable  194  10.152.183.198  no       installing agent
-udm                       1.4.3    active       1  sdcore-udm-k8s            1.5/edge       489  10.152.183.31   no       
-udr                       1.4.1    active       1  sdcore-udr-k8s            1.5/edge       486  10.152.183.82   no       
-upf                       1.4.0    active       1  sdcore-upf-k8s            1.5/edge       591  10.152.183.164  no       
+smf                       1.6.2    active       1  sdcore-smf-k8s            1.5/stable     745  10.152.183.64   no       
+traefik                   2.11.0   waiting      1  traefik-k8s               latest/stable  199  10.152.183.198  no       installing agent
+udm                       1.5.1    active       1  sdcore-udm-k8s            1.5/stable     605  10.152.183.31   no       
+udr                       1.6.1    active       1  sdcore-udr-k8s            1.5/stable     597  10.152.183.82   no       
+upf                       1.5.0    active       1  sdcore-upf-k8s            1.5/stable     691  10.152.183.164  no       
 
 Unit                         Workload  Agent  Address      Ports  Message
 amf/0*                       active    idle   10.1.10.181         
@@ -203,7 +203,7 @@ pcf/0*                       active    idle   10.1.10.146
 router/0*                    active    idle   10.1.10.145         
 self-signed-certificates/0*  active    idle   10.1.10.141         
 smf/0*                       active    idle   10.1.10.154         
-traefik/0*                   error     idle   10.1.10.160         hook failed: "ingress-relation-changed"
+traefik/0*                   error     idle   10.1.10.160         hook failed: "certificates-relation-changed"
 udm/0*                       active    idle   10.1.10.187         
 udr/0*                       active    idle   10.1.10.176         
 upf/0*                       active    idle   10.1.10.169
@@ -327,6 +327,26 @@ The deployment is ready when the `cu` application is in the `active/idle` state.
 
 ## 3. Configure the 5G core network through the Network Management System
 
+Retrieve the NMS credentials (`username` and `password`):
+
+```console
+juju switch sdcore
+juju show-secret NMS_LOGIN --reveal
+```
+The output looks like this:
+```
+csurgu7mp25c761k2oe0:
+  revision: 1
+  owner: nms
+  label: NMS_LOGIN
+  created: 2024-11-20T10:22:49Z
+  updated: 2024-11-20T10:22:49Z
+  content:
+    password: ',u7=VEE3XK%t'
+    token: ""
+    username: charm-admin-SOOO
+```
+
 Retrieve the NMS address:
 
 ```console
@@ -335,7 +355,7 @@ juju run traefik/0 show-proxied-endpoints
 ```
 
 The output should be `http://sdcore-nms.10.0.0.2.nip.io/`.<br>
-Navigate to this address in your browser.
+Navigate to this address in your browser and use the `username` and `password` to login.
 
 In the Network Management System (NMS), create a network slice with the following attributes:
 
