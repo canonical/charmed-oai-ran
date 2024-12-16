@@ -285,10 +285,10 @@ resource "juju_integration" "cu-amf" {
 }
 
 resource "juju_integration" "cu-nms" {
-  model = juju_model.sdcore.name
+  model = juju_model.oai-ran.name
   application {
-    name     = module.sdcore.nms_app_name
-    endpoint = module.sdcore.fiveg_core_gnb_endpoint
+    name     = module.cu.app_name
+    endpoint = module.cu.fiveg_core_gnb_endpoint
   }
   application {
     offer_url = module.sdcore.nms_fiveg_core_gnb_offer_url
