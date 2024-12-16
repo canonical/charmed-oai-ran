@@ -317,7 +317,7 @@ juju switch ran
 juju status --watch 1s --relations
 ```
 
-The deployment is ready when the `cu` application is in the `active/idle` state.
+The deployment is ready when the `cu` application is in the `waiting/idle` state and the message is `Waiting for TAC and PLMNs configuration`.
 
 ## 3. Configure the 5G core network through the Network Management System
 
