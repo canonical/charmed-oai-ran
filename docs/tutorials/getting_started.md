@@ -43,9 +43,9 @@ Enable the following MicroK8s addons.
 We must give MetalLB an address range that has at least 3 IP addresses for Charmed Aether SD-Core.
 
 ```console
-microk8s enable hostpath-storage
-microk8s enable multus
-microk8s enable metallb:10.0.0.2-10.0.0.4
+sudo microk8s enable hostpath-storage
+sudo microk8s enable multus
+sudo microk8s enable metallb:10.0.0.2-10.0.0.4
 ```
 
 ### Bootstrap a Juju controller
