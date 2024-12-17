@@ -14,10 +14,13 @@ module "cu" {
   }
 }
 
-resource "juju_offer" "cu-fiveg-gnb-identity" {
-  model            = juju_model.oai-ran.name
-  application_name = module.cu.app_name
-  endpoint         = module.cu.fiveg_gnb_identity_endpoint
+module "du" {
+  source = "git::https://github.com/canonical/oai-ran-du-k8s-operator//terraform"
+
+  model_name = juju_model.oai-ran.name
+  config     = {
+    "simulation-mode": true
+  }
 }
 
 resource "juju_integration" "cu-amf" {
@@ -32,22 +35,13 @@ resource "juju_integration" "cu-amf" {
 }
 
 resource "juju_integration" "cu-nms" {
-  model = juju_model.sdcore.name
+  model = juju_model.oai-ran.name
   application {
-    name     = module.sdcore.nms_app_name
-    endpoint = module.sdcore.fiveg_gnb_identity_endpoint
+    name     = module.cu.app_name
+    endpoint = module.cu.fiveg_core_gnb_endpoint
   }
   application {
-    offer_url = juju_offer.cu-fiveg-gnb-identity.url
-  }
-}
-
-module "du" {
-  source = "git::https://github.com/canonical/oai-ran-du-k8s-operator//terraform"
-
-  model_name = juju_model.oai-ran.name
-  config     = {
-    "simulation-mode": true
+    offer_url = module.sdcore.nms_fiveg_core_gnb_offer_url
   }
 }
 
