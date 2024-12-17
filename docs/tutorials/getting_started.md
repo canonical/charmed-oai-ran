@@ -23,14 +23,14 @@ To complete this tutorial, you will need a machine which meets the following req
 From your terminal, install MicroK8s:
 
 ```console
-sudo snap install microk8s --channel=1.31/stable --classic
+sudo snap install microk8s --channel=1.31-strict/stable
 ```
 
 Add your user to the `microk8s` group:
 
 ```console
-sudo usermod -a -G microk8s $USER
-newgrp microk8s
+sudo usermod -a -G snap_microk8s $USER
+newgrp snap_microk8s
 ```
 
 Add the community repository MicroK8s addon:
@@ -43,15 +43,9 @@ Enable the following MicroK8s addons.
 We must give MetalLB an address range that has at least 3 IP addresses for Charmed Aether SD-Core.
 
 ```console
-microk8s enable hostpath-storage
-microk8s enable multus
-microk8s enable metallb:10.0.0.2-10.0.0.4
-```
-
-Export MicroK8s cluster's configuration:
-
-```console
-microk8s config > ~/.kube/config
+sudo microk8s enable hostpath-storage
+sudo microk8s enable multus
+sudo microk8s enable metallb:10.0.0.2-10.0.0.4
 ```
 
 ### Bootstrap a Juju controller
@@ -62,16 +56,17 @@ From your terminal, install Juju:
 sudo snap install juju --channel=3.6/stable
 ```
 
-Add MicroK8s cluster to Juju:
-
-```console
-juju add-k8s microk8s-classic
-```
-
 Bootstrap a Juju controller:
 
 ```console
-juju bootstrap microk8s-classic
+juju bootstrap microk8s
+```
+
+```{note}
+There is a [bug](https://bugs.launchpad.net/juju/+bug/1988355) in Juju that occurs when
+bootstrapping a controller on a new machine. If you encounter it, create the following
+directory:
+`mkdir -p /home/ubuntu/.local/share`
 ```
 
 ### Install Terraform
@@ -109,7 +104,7 @@ EOF
 Create a Terraform module containing the Charmed Aether SD-Core and a router:
 
 ```console
-cat << EOF > main.tf
+cat << EOF > core.tf
 resource "juju_model" "sdcore" {
   name = "sdcore"
 }
@@ -170,43 +165,48 @@ It is also expected that `traefik` goes to the error state (related Traefik [bug
 Example:
 
 ```console
-ubuntu@host:~$ juju status
+ubuntu@host:~/terraform $ juju status
 Model      Controller                  Cloud/Region                Version  SLA          Timestamp
-sdcore     microk8s-classic-localhost  microk8s-classic/localhost  3.6.0   unsupported  08:08:50Z
+sdcore  microk8s-localhost  microk8s/localhost  3.6.1    unsupported  09:10:50+01:00
 
 App                       Version  Status   Scale  Charm                     Channel        Rev  Address         Exposed  Message
-amf                       1.5.1    active       1  sdcore-amf-k8s            1.5/stable     834  10.152.183.176  no       
-ausf                      1.5.1    active       1  sdcore-ausf-k8s           1.5/stable     645  10.152.183.65   no       
-grafana-agent             0.32.1   waiting      1  grafana-agent-k8s         latest/stable  45   10.152.183.221  no       installing agent
-mongodb                            active       1  mongodb-k8s               6/stable       61   10.152.183.92   no       Primary
-nms                       1.0.0    active       1  sdcore-nms-k8s            1.5/stable     741  10.152.183.141  no       
-nrf                       1.5.2    active       1  sdcore-nrf-k8s            1.5/stable     720  10.152.183.130  no       
-nssf                      1.5.1    active       1  sdcore-nssf-k8s           1.5/stable     614  10.152.183.62   no       
-pcf                       1.5.2    active       1  sdcore-pcf-k8s            1.5/stable     650  10.152.183.144  no       
-router                             active       1  sdcore-router-k8s         1.5/stable     424  10.152.183.218  no       
-self-signed-certificates           active       1  self-signed-certificates  latest/stable  155  10.152.183.33   no       
-smf                       1.6.2    active       1  sdcore-smf-k8s            1.5/stable     745  10.152.183.64   no       
-traefik                   2.11.0   waiting      1  traefik-k8s               latest/stable  199  10.152.183.198  no       installing agent
-udm                       1.5.1    active       1  sdcore-udm-k8s            1.5/stable     605  10.152.183.31   no       
-udr                       1.6.1    active       1  sdcore-udr-k8s            1.5/stable     597  10.152.183.82   no       
-upf                       1.5.0    active       1  sdcore-upf-k8s            1.5/stable     691  10.152.183.164  no       
+amf                       1.6.1    active       1  sdcore-amf-k8s            1.6/edge       863  10.152.183.24   no       
+ausf                      1.5.1    active       1  sdcore-ausf-k8s           1.6/edge       676  10.152.183.54   no       
+grafana-agent             0.40.4   blocked      1  grafana-agent-k8s         latest/stable   80  10.152.183.247  no       Missing ['grafana-cloud-config']|['logging-consumer'] for logging-provider; ['grafana-cloud-config']|['send-remote-wr...
+mongodb                            active       1  mongodb-k8s               6/stable        61  10.152.183.233  no       
+nms                       1.1.0    active       1  sdcore-nms-k8s            1.6/edge       799  10.152.183.107  no       
+nrf                       1.6.1    active       1  sdcore-nrf-k8s            1.6/edge       748  10.152.183.179  no       
+nssf                      1.5.1    active       1  sdcore-nssf-k8s           1.6/edge       631  10.152.183.133  no       
+pcf                       1.5.2    active       1  sdcore-pcf-k8s            1.6/edge       670  10.152.183.21   no       
+router                             active       1  sdcore-router-k8s         1.6/edge       437  10.152.183.203  no       
+self-signed-certificates           active       1  self-signed-certificates  latest/stable  155  10.152.183.201  no       
+smf                       1.6.2    active       1  sdcore-smf-k8s            1.6/edge       765  10.152.183.172  no       
+traefik                   2.11.0   error        1  traefik-k8s               latest/stable  203  10.152.183.128  no       hook failed: "ingress-relation-created"
+udm                       1.5.1    active       1  sdcore-udm-k8s            1.6/edge       626  10.152.183.52   no       
+udr                       1.6.1    active       1  sdcore-udr-k8s            1.6/edge       613  10.152.183.236  no       
+upf                       1.4.0    active       1  sdcore-upf-k8s            1.6/edge       678  10.152.183.34   no       
 
-Unit                         Workload  Agent  Address      Ports  Message
-amf/0*                       active    idle   10.1.10.181         
-ausf/0*                      active    idle   10.1.10.186         
-grafana-agent/0*             blocked   idle   10.1.10.133         grafana-cloud-config: off, logging-consumer: off
-mongodb/0*                   active    idle   10.1.10.155         Primary
-nms/0*                       active    idle   10.1.10.174         
-nrf/0*                       active    idle   10.1.10.151         
-nssf/0*                      active    idle   10.1.10.136         
-pcf/0*                       active    idle   10.1.10.146         
-router/0*                    active    idle   10.1.10.145         
-self-signed-certificates/0*  active    idle   10.1.10.141         
-smf/0*                       active    idle   10.1.10.154         
-traefik/0*                   error     idle   10.1.10.160         hook failed: "ingress-relation-created"
-udm/0*                       active    idle   10.1.10.187         
-udr/0*                       active    idle   10.1.10.176         
-upf/0*                       active    idle   10.1.10.169
+Unit                         Workload  Agent  Address       Ports  Message
+amf/0*                       active    idle   10.1.194.224         
+ausf/0*                      active    idle   10.1.194.212         
+grafana-agent/0*             blocked   idle   10.1.194.214         Missing ['grafana-cloud-config']|['logging-consumer'] for logging-provider; ['grafana-cloud-config']|['send-remote-wr...
+mongodb/0*                   active    idle   10.1.194.193         
+nms/0*                       active    idle   10.1.194.217         
+nrf/0*                       active    idle   10.1.194.241         
+nssf/0*                      active    idle   10.1.194.249         
+pcf/0*                       active    idle   10.1.194.201         
+router/0*                    active    idle   10.1.194.255         
+self-signed-certificates/0*  active    idle   10.1.194.219         
+smf/0*                       active    idle   10.1.194.223         
+traefik/0*                   error     idle   10.1.194.251         hook failed: "ingress-relation-created"
+udm/0*                       active    idle   10.1.194.199         
+udr/0*                       active    idle   10.1.194.231         
+upf/0*                       active    idle   10.1.194.240         
+
+Offer  Application  Charm           Rev  Connected  Endpoint        Interface       Role
+amf    amf          sdcore-amf-k8s  863  0/0        fiveg-n2        fiveg_n2        provider
+nms    nms          sdcore-nms-k8s  799  0/0        fiveg_core_gnb  fiveg_core_gnb  provider
+upf    upf          sdcore-upf-k8s  678  0/0        fiveg_n3        fiveg_n3        provider
 ```
 
 ### Configure the ingress
@@ -220,16 +220,16 @@ microk8s.kubectl -n sdcore get svc | grep "traefik-lb"
 The output should look similar to below:
 
 ```console
-ubuntu@host:~/terraform$ microk8s.kubectl -n sdcore get svc | grep "traefik-lb"
+ubuntu@host:~/terraform $ microk8s.kubectl -n sdcore get svc | grep "traefik-lb"
 traefik-lb                           LoadBalancer   10.152.183.142   10.0.0.2      80:32435/TCP,443:32483/TCP    11m
 ```
 
 In this tutorial, the IP is `10.0.0.2`. Please note it, as we will need it in the next step.
 
-Configure Traefik to use an external hostname. To do that, edit `traefik_config` in the `main.tf` file:
+Configure Traefik to use an external hostname. To do that, edit `traefik_config` in the `core.tf` file:
 
 ```
-:caption: main.tf
+:caption: core.tf
 (...)
 module "sdcore" {
   (...)
@@ -254,9 +254,9 @@ Resolve Traefik error in Juju:
 juju resolve traefik/0
 ```
 
-## 2. Deploy Charmed OAI RAN CU
+## 2. Deploy Charmed OAI RAN CU and DU
 
-Create a Terraform module for the Radio Access Network and add Charmed OAI RAN CU to it:
+Create a Terraform module for the Radio Access Network and add Charmed OAI RAN CU and Charmed OAI RAN DU to it:
 
 ```console
 cat << EOF > ran.tf
@@ -273,10 +273,13 @@ module "cu" {
   }
 }
 
-resource "juju_offer" "cu-fiveg-gnb-identity" {
-  model            = juju_model.oai-ran.name
-  application_name = module.cu.app_name
-  endpoint         = module.cu.fiveg_gnb_identity_endpoint
+module "du" {
+  source = "git::https://github.com/canonical/oai-ran-du-k8s-operator//terraform"
+
+  model_name = juju_model.oai-ran.name
+  config     = {
+    "simulation-mode": true
+  }
 }
 
 resource "juju_integration" "cu-amf" {
@@ -291,13 +294,25 @@ resource "juju_integration" "cu-amf" {
 }
 
 resource "juju_integration" "cu-nms" {
-  model = juju_model.sdcore.name
+  model = juju_model.oai-ran.name
   application {
-    name     = module.sdcore.nms_app_name
-    endpoint = module.sdcore.fiveg_gnb_identity_endpoint
+    name     = module.cu.app_name
+    endpoint = module.cu.fiveg_core_gnb_endpoint
   }
   application {
-    offer_url = juju_offer.cu-fiveg-gnb-identity.url
+    offer_url = module.sdcore.nms_fiveg_core_gnb_offer_url
+  }
+}
+
+resource "juju_integration" "du-cu" {
+  model = juju_model.oai-ran.name
+  application {
+    name     = module.du.app_name
+    endpoint = module.du.fiveg_f1_endpoint
+  }
+  application {
+    name     = module.cu.app_name
+    endpoint = module.cu.fiveg_f1_endpoint
   }
 }
 
@@ -323,7 +338,7 @@ juju switch ran
 juju status --watch 1s --relations
 ```
 
-The deployment is ready when the `cu` application is in the `active/idle` state.
+At this stage both the `cu` and the `du` applications are expected to be in the `waiting/idle` state and the messages should indicate they're waiting for network configuration.
 
 ## 3. Configure the 5G core network through the Network Management System
 
@@ -333,7 +348,9 @@ Retrieve the NMS credentials (`username` and `password`):
 juju switch sdcore
 juju show-secret NMS_LOGIN --reveal
 ```
+
 The output looks like this:
+
 ```
 csurgu7mp25c761k2oe0:
   revision: 1
@@ -362,8 +379,8 @@ In the Network Management System (NMS), create a network slice with the followin
 - Name: `Tutorial`
 - MCC: `001`
 - MNC: `01`
-- UPF: `upf-external.private5g.svc.cluster.local:8805`
-- gNodeB: `private5g-cu-cu (tac:1)`
+- UPF: `upf-external.sdcore.svc.cluster.local:8805`
+- gNodeB: `ran-cu-cu (tac:1)`
 
 You should see the following network slice created:
 
@@ -395,56 +412,34 @@ To restart the CU Pod execute:
 `microk8s.kubectl -n ran delete pod cu-0`
 ```
 
-## 4. Deploy Charmed OAI RAN DU
+After adding the network configuration the CU and the DU should change their state to `active/idle`. 
 
-Add Charmed OAI RAN DU Terraform module to `ran.tf`:
-
-```console
-cat << EOF >> ran.tf
-module "du" {
-  source = "git::https://github.com/canonical/oai-ran-du-k8s-operator//terraform"
-
-  model_name = juju_model.oai-ran.name
-  config     = {
-    "simulation-mode": true
-  }
-}
-
-resource "juju_integration" "du-cu" {
-  model = juju_model.oai-ran.name
-  application {
-    name     = module.du.app_name
-    endpoint = module.du.fiveg_f1_endpoint
-  }
-  application {
-    name     = module.cu.app_name
-    endpoint = module.cu.fiveg_f1_endpoint
-  }
-}
-
-EOF
-```
-
-Update Juju Terraform provider:
-
-```console
-terraform init
-```
-
-Deploy DU:
-
-```console
-terraform apply -auto-approve
-```
-
-Monitor the status of the deployment:
+To verify that run:
 
 ```console
 juju switch ran
-juju status --watch 1s --relations
+juju status
 ```
 
-The deployment is ready when the `du` application is in the `active/idle` state.
+Output should be similar to:
+
+```console
+ubuntu@host:~/terraform $ juju status
+Model  Controller          Cloud/Region        Version  SLA          Timestamp
+ran    microk8s-localhost  microk8s/localhost  3.6.1    unsupported  09:29:04+01:00
+
+SAAS  Status  Store  URL
+amf   active  local  admin/sdcore.amf
+nms   active  local  admin/sdcore.nms
+
+App  Version  Status  Scale  Charm           Channel   Rev  Address         Exposed  Message
+cu            active      1  oai-ran-cu-k8s  2.1/edge   46  10.152.183.152  no       
+du            active      1  oai-ran-du-k8s  2.1/edge   56  10.152.183.80   no       
+
+Unit   Workload  Agent  Address       Ports  Message
+cu/0*  active    idle   10.1.194.205         
+du/0*  active    idle   10.1.194.250
+```
 
 ## 5. Deploy Charmed OAI RAN UE Simulator
 
@@ -538,7 +533,7 @@ terraform destroy -auto-approve
 
 ```{note}
 Terraform does not remove anything from the working directory. If needed, please clean up
-the `terraform` directory manually by removing everything except for the `main.tf`
+the `terraform` directory manually by removing everything except for the `core.tf`
 and `terraform.tf` files.
 ```
 
