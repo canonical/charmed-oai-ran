@@ -10,8 +10,16 @@ Charmed OAI RAN DU needs to be configured in simulation mode to work with the UE
 
 To enable the DU to run in simulation mode, set the `simulation-mode` configuration option to `true`:
 
-```console
-juju config du simulation-mode=true
+```hcl
+module "du" {
+  source = "git::https://github.com/canonical/oai-ran-du-k8s-operator//terraform"
+
+  model_name = juju_model.oai-ran.name
+  config     = {
+    "simulation-mode": true
+    "use-three-quarter-sampling" = "true"
+  }
+}
 ```
 
 ## 2. Deploy Charmed OAI RAN UE Simulator
