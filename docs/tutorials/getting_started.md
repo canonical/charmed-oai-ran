@@ -325,7 +325,7 @@ Update Juju Terraform provider:
 terraform init
 ```
 
-Deploy CU:
+Deploy Charmed OAI RAN CU and DU:
 
 ```console
 terraform apply -auto-approve
@@ -367,7 +367,6 @@ csurgu7mp25c761k2oe0:
 Retrieve the NMS address:
 
 ```console
-juju switch sdcore
 juju run traefik/0 show-proxied-endpoints
 ```
 

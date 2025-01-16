@@ -1,11 +1,8 @@
 # Integrate Charmed OAI RAN with Canonical Observability Stack
 
-One of the key aspects considered while developing Charmed OAI RAN was making it easily observable.
-To achieve this, each [Charmed OAI RAN Terraform module][Charmed OAI RAN Terraform modules] includes Grafana Agent application, which allows for integration with the Canonical Observability Stack (COS).
+Each [Charmed OAI RAN Terraform module][Charmed OAI RAN Terraform modules] includes a Grafana Agent application, which allows for integration with the Canonical Observability Stack (COS).
 
 This how-to guide outlines the process of integrating Charmed OAI RAN with COS.
-
-Steps described in this guide can be performed as both Day 1 and Day 2 operations.
 
 ```{note}
 Deploying Canonical Observability Stack will increase the resources consumption on the K8s cluster. 

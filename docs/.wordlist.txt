@@ -1,6 +1,10 @@
 addon
 addons
+AMF
+api
+CharmHub
 disaggregated
+Ettus
 gNB
 gNodeB
 hostname
@@ -12,6 +16,7 @@ IMSI
 Juju
 Kubernetes
 LoadBalancer
+loki
 MetalLB
 MicroK
 MCC
@@ -23,8 +28,11 @@ observability
 OAI
 OPC
 Ryzen
+SMA
 Terraform
 Traefik
 Traefik's
+Tx
 UE
 UPF
+USRP
