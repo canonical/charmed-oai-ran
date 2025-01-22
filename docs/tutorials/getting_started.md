@@ -432,8 +432,8 @@ amf   active  local  admin/sdcore.amf
 nms   active  local  admin/sdcore.nms
 
 App  Version  Status  Scale  Charm           Channel   Rev  Address         Exposed  Message
-cu            active      1  oai-ran-cu-k8s  2.1/edge   46  10.152.183.152  no       
-du            active      1  oai-ran-du-k8s  2.1/edge   56  10.152.183.80   no       
+cu            active      1  oai-ran-cu-k8s  2.2/edge   55  10.152.183.152  no
+du            active      1  oai-ran-du-k8s  2.2/edge   64  10.152.183.80   no
 
 Unit   Workload  Agent  Address       Ports  Message
 cu/0*  active    idle   10.1.194.205         
