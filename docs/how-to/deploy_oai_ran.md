@@ -15,7 +15,7 @@ resource "juju_model" "oai-ran" {
 module "cu" {
   source = "git::https://github.com/canonical/oai-ran-cu-k8s-operator//terraform"
 
-  model_name = juju_model.oai-ran.name
+  model      = juju_model.oai-ran.name
   config     = {
     "n3-interface-name": "ran"
   }
@@ -24,7 +24,7 @@ module "cu" {
 module "du" {
   source = "git::https://github.com/canonical/oai-ran-du-k8s-operator//terraform"
 
-  model_name = juju_model.oai-ran.name
+  model      = juju_model.oai-ran.name
   config     = {
     "simulation-mode": false,
     "use-three-quarter-sampling": true

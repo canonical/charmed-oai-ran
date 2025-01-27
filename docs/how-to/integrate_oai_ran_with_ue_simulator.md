@@ -14,8 +14,8 @@ To enable the DU to run in simulation mode, set the `simulation-mode` configurat
 module "du" {
   source = "git::https://github.com/canonical/oai-ran-du-k8s-operator//terraform"
 
-  model_name = juju_model.oai-ran.name
-  config     = {
+  model  = juju_model.oai-ran.name
+  config = {
     "simulation-mode": true
     "use-three-quarter-sampling" = "true"
   }
@@ -31,7 +31,7 @@ cat << EOF >> ue.tf
 module "ue" {
   source = "git::https://github.com/canonical/oai-ran-ue-k8s-operator//terraform"
 
-  model_name = juju_model.oai-ran.name
+  model  = juju_model.oai-ran.name
 }
 
 resource "juju_integration" "ue-du" {

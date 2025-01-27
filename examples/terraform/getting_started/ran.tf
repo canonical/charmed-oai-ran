@@ -8,8 +8,8 @@ resource "juju_model" "oai-ran" {
 module "cu" {
   source = "git::https://github.com/canonical/oai-ran-cu-k8s-operator//terraform"
 
-  model_name = juju_model.oai-ran.name
-  config     = {
+  model  = juju_model.oai-ran.name
+  config = {
     "n3-interface-name": "ran"
   }
 }
@@ -17,8 +17,8 @@ module "cu" {
 module "du" {
   source = "git::https://github.com/canonical/oai-ran-du-k8s-operator//terraform"
 
-  model_name = juju_model.oai-ran.name
-  config     = {
+  model  = juju_model.oai-ran.name
+  config = {
     "simulation-mode": true
   }
 }
@@ -60,7 +60,7 @@ resource "juju_integration" "du-cu" {
 module "ue" {
   source = "git::https://github.com/canonical/oai-ran-ue-k8s-operator//terraform"
 
-  model_name = juju_model.oai-ran.name
+  model = juju_model.oai-ran.name
 }
 
 resource "juju_integration" "ue-du" {
