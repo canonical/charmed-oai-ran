@@ -119,8 +119,8 @@ module "sdcore-router" {
 module "sdcore" {
   source = "git::https://github.com/canonical/terraform-juju-sdcore//modules/sdcore-k8s"
 
-  model        = juju_model.sdcore.name
-  depends_on = [module.sdcore-router]
+  model          = juju_model.sdcore.name
+  depends_on     = [module.sdcore-router]
 
   traefik_config = {
     routing_mode = "subdomain"
@@ -155,7 +155,7 @@ Monitor the status of the deployment:
 
 ```console
 juju switch sdcore
-watch -n 1 -c juju status --color --relations
+juju status --watch 1s --relations
 ```
 
 The deployment is ready when all the charms are in the `active/idle` state.<br>
@@ -248,12 +248,6 @@ Apply new configuration:
 terraform apply -auto-approve
 ```
 
-Resolve Traefik error in Juju:
-
-```console
-juju resolve traefik/0
-```
-
 ## 2. Deploy Charmed OAI RAN CU and DU
 
 Create a Terraform module for the Radio Access Network and add Charmed OAI RAN CU and Charmed OAI RAN DU to it:
@@ -267,8 +261,8 @@ resource "juju_model" "oai-ran" {
 module "cu" {
   source = "git::https://github.com/canonical/oai-ran-cu-k8s-operator//terraform"
 
-  model_name = juju_model.oai-ran.name
-  config     = {
+  model  = juju_model.oai-ran.name
+  config = {
     "n3-interface-name": "ran"
   }
 }
@@ -276,8 +270,8 @@ module "cu" {
 module "du" {
   source = "git::https://github.com/canonical/oai-ran-du-k8s-operator//terraform"
 
-  model_name = juju_model.oai-ran.name
-  config     = {
+  model  = juju_model.oai-ran.name
+  config = {
     "simulation-mode": true
   }
 }
@@ -286,7 +280,7 @@ resource "juju_integration" "cu-amf" {
   model = juju_model.oai-ran.name
   application {
     name     = module.cu.app_name
-    endpoint = module.cu.fiveg_n2_endpoint
+    endpoint = module.cu.requires.fiveg_n2
   }
   application {
     offer_url = module.sdcore.amf_fiveg_n2_offer_url
@@ -297,7 +291,7 @@ resource "juju_integration" "cu-nms" {
   model = juju_model.oai-ran.name
   application {
     name     = module.cu.app_name
-    endpoint = module.cu.fiveg_core_gnb_endpoint
+    endpoint = module.cu.requires.fiveg_core_gnb
   }
   application {
     offer_url = module.sdcore.nms_fiveg_core_gnb_offer_url
@@ -308,11 +302,11 @@ resource "juju_integration" "du-cu" {
   model = juju_model.oai-ran.name
   application {
     name     = module.du.app_name
-    endpoint = module.du.fiveg_f1_endpoint
+    endpoint = module.du.requires.fiveg_f1
   }
   application {
     name     = module.cu.app_name
-    endpoint = module.cu.fiveg_f1_endpoint
+    endpoint = module.cu.provides.fiveg_f1
   }
 }
 
@@ -449,18 +443,18 @@ cat << EOF >> ran.tf
 module "ue" {
   source = "git::https://github.com/canonical/oai-ran-ue-k8s-operator//terraform"
 
-  model_name = juju_model.oai-ran.name
+  model = juju_model.oai-ran.name
 }
 
 resource "juju_integration" "ue-du" {
   model = juju_model.oai-ran.name
   application {
     name     = module.ue.app_name
-    endpoint = module.ue.fiveg_rfsim_endpoint
+    endpoint = module.ue.requires.fiveg_rfsim
   }
   application {
     name     = module.du.app_name
-    endpoint = module.du.fiveg_rfsim_endpoint
+    endpoint = module.du.provides.fiveg_rfsim
   }
 }
 
@@ -492,13 +486,13 @@ The deployment is ready when the `ue` application is in the `active/idle` state.
 Run the simulation:
 
 ```console
-juju run ue/leader start-simulation
+juju run ue/leader ping
 ```
 
 The simulation executed successfully if you see `success: "true"` as one of the output messages:
 
 ```console
-ubuntu@host:~$ juju run ue/leader start-simulation
+ubuntu@host:~$ juju run ue/leader ping
 Running operation 1 with 1 task
   - task 2 on unit-ue-0
 

@@ -17,7 +17,7 @@ Update your solution Terraform module (here it's named `main.tf`):
 cat << EOF > main.tf
 module "cos" {
   source                   = "git::https://github.com/canonical/terraform-juju-sdcore//modules/external/cos-lite"
-  model_name               = "cos-lite"
+  model                    = "cos-lite"
   deploy_cos_configuration = true
   cos_configuration_config = {
     git_repo                = "https://github.com/canonical/sdcore-cos-configuration"
@@ -83,13 +83,13 @@ resource "juju_model" "ran" {
 
 module "oai-ran" {
   source                   = "git::https://github.com/canonical/terraform-juju-oai-ran-k8s//modules/oai-ran-k8s"
-  model_name               = juju_model.ran.name
+  model                    = juju_model.ran.name
   create_model             = false
 }
 
 module "cos" {
   source                   = "git::https://github.com/canonical/terraform-juju-sdcore//modules/external/cos-lite"
-  model_name               = "cos-lite"
+  model                    = "cos-lite"
   deploy_cos_configuration = true
   cos_configuration_config = {
     git_repo                = "https://github.com/canonical/sdcore-cos-configuration"
