@@ -4,7 +4,7 @@ This guide explains how to deploy the Charmed OAI RAN CU and DU applications usi
 
 ## 1. Create a Terraform module for the Radio Access Network
 
-Create a Terraform module for the Radio Access Network and add Charmed OAI RAN CU and Charmed OAI RAN DU to it:
+Create a Terraform module for the Radio Access Network and add Charmed OAI RAN CU and Charmed OAI RAN DU to it. Then, replace the placeholders in the DU configuration with the actual values to meet your requirements. Please check the [DU Configuration] to see the supported ranges.
 
 ```console
 cat << EOF > ran.tf
@@ -28,10 +28,10 @@ module "du" {
   config     = {
     "simulation-mode": false,
     "use-three-quarter-sampling": true,
-    "bandwidth": 40,
-    "frequency-band": 77,
-    "sub-carrier-spacing": 30,
-    "center-frequency": "4060",
+    "bandwidth": <your bandwidth in MHz>,
+    "frequency-band": <your frequency band>,
+    "sub-carrier-spacing": <your sub carrierspacing in kHz>,
+    "center-frequency": "<your center frequency in MHz>",
   }
 }
 
@@ -96,3 +96,6 @@ juju status --watch 1s --relations
 ```
 
 At this stage both the `cu` and the `du` applications are expected to be in the `waiting/idle` state and the messages should indicate they're waiting for network configuration. The charms will go to `active/idle` state once network configuration information necessary to start the workloads is provided to the charms through the `fiveg_core_gnb` (between the Core and the CU) and `fiveg_f1` (between the CU and DU) Juju integrations. This information is automatically exchanged when the charms are integrated with Charmed Aether SD-Core.
+
+
+[DU Configuration]: https://charmhub.io/oai-ran-du-k8s/configurations?channel=2.2/edge

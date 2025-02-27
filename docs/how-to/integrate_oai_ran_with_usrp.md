@@ -4,13 +4,13 @@ This guide explains how to integrate Charmed OAI RAN with an Ettus Research USRP
 
 The OAI RAN DU charm expects the USRP radio to be connected to the host machine via USB 3. 
 
-1. Deploy Charmed OAI RAN following the [how-to guide](deploy_oai_ran.md). Deploy the DU with the following configuration options that meets your requirements. Please check the [DU Configuration] to see the supported ranges. 
+1. Deploy Charmed OAI RAN following the [how-to guide](deploy_oai_ran.md). Deploy the DU with the following configuration options that meet your requirements. Please check the [DU Configuration] to see the supported ranges. 
     * `simulation-mode`: `false`
     * `use-three-quarter-sampling`: `true`
-    * `bandwidth`: `<your bandwidth>`
+    * `bandwidth`: `<your bandwidth in MHz>`
     * `frequency-band`: `<your frequency band>`
-    * `sub-carrier-spacing`: `<your sub carrierspacing>`
-    * `center-frequency`: `<your center frequency>`
+    * `sub-carrier-spacing`: `<your sub carrierspacing in kHz>`
+    * `center-frequency`: `<your center frequency in MHz>`
 
 2. Connect the USRP radio to the host machine via USB. The DU should automatically detect the USRP radio.
 
