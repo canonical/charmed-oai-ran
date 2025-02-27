@@ -27,7 +27,11 @@ module "du" {
   model      = juju_model.oai-ran.name
   config     = {
     "simulation-mode": false,
-    "use-three-quarter-sampling": true
+    "use-three-quarter-sampling": true,
+    "bandwidth": 40,
+    "frequency-band": 77,
+    "sub-carrier-spacing": 30,
+    "center-frequency": "4060",
   }
 }
 
