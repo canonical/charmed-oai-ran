@@ -3,6 +3,7 @@ addons
 AMF
 api
 ARP
+bitrate
 CharmHub
 disaggregated
 DNS
