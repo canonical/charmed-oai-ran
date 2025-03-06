@@ -373,7 +373,7 @@ Navigate to this address in your browser and use the `username` and `password` t
 
 In the Network Management System (NMS), create a network slice with the following attributes:
 
-- Name: `Tutorial`
+- Name: `default`
 - MCC: `001`
 - MNC: `01`
 - UPF: `upf-external.sdcore.svc.cluster.local:8805`
@@ -386,14 +386,34 @@ You should see the following network slice created:
 :align: center
 ```
 
+Navigate to the Device Groups page and create a new device group with the following attributes:
+- Name: `device-group`
+- Network Slice: `default`
+- Subscriber IP pool: `172.250.1.0/16`
+- DNS: `8.8.8.8`
+- MTU (bytes): `1456`
+- Maximum bitrate (Mbps):
+  - Downstream: `200`
+  - Upstream: `20`
+- QoS:
+  - 5QI: `1: GBR - Conversational Voice`
+  - ARP: `6`
+
+You should see the following device group created:
+
+```{image} ../images/nms_device_group.png
+:alt: NMS Device Group
+:align: center
+```
+
 Navigate to Subscribers and create a new subscriber with the following attributes:
 
 - IMSI: `001010100007487`
 - OPC: `981d464c7c52eb6e5036234984ad0bcf`
 - Key: `5122250214c33e723a5dd523fc145fc0`
 - Sequence Number: `16f3b3f70fc2`
-- Network Slice: `Tutorial`
-- Device Group: `Tutorial-default`
+- Network Slice: `default`
+- Device Group: `device-group`
 
 You should see the following subscriber created:
 
