@@ -557,5 +557,5 @@ and `terraform.tf` files.
 Destroy the Juju controller and all its models:
 
 ```console
-juju kill-controller microk8s-classic-localhost
+juju kill-controller microk8s-localhost
 ```
