@@ -411,7 +411,9 @@ Navigate to Subscribers and create a new subscriber with the following attribute
 - Network Slice: `default`
 - Device Group: `device-group`
 
-Click on the two `Generate` buttons to automatically fill in the IMSI, OPC, Key and Sequence Number. After clicking on the `Submit` button you should see the subscriber created:
+Click on the two `Generate` buttons to automatically fill in the values in the form. Note the IMSI, OPC and Key, we are going to use them in the next step.
+
+After clicking on the `Submit` button you should see the subscriber created:
 
 ```{image} ../images/nms_subscriber.png
 :alt: NMS Subscriber
@@ -456,7 +458,7 @@ du/0*  active    idle   10.1.194.250
 
 ## 5. Deploy Charmed OAI RAN UE Simulator
 
-Add Charmed OAI RAN UE Terraform module to `ran.tf`:
+Add Charmed OAI RAN UE Terraform module to `ran.tf`. Please replace the `imsi`, `key` and `opc` with the subscriber values from previous step:
 
 ```console
 cat << EOF >> ran.tf
@@ -464,6 +466,12 @@ module "ue" {
   source = "git::https://github.com/canonical/oai-ran-ue-k8s-operator//terraform"
 
   model = juju_model.oai-ran.name
+
+  config = {
+    imsi = "001010100007487"                   # Use the IMSI generated in the previous step
+    key  = "5122250214c33e723a5dd523fc145fc0"  # Use the Key generated in the previous step
+    opc  = "981d464c7c52eb6e5036234984ad0bcf"  # Use the OPC generated in the previous step
+  }
 }
 
 resource "juju_integration" "ue-du" {
