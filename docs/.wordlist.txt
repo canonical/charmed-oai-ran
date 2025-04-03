@@ -35,6 +35,7 @@ QI
 QoS
 Ryzen
 SMA
+TAC
 Terraform
 Traefik
 Traefik's

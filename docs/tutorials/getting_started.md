@@ -159,54 +159,53 @@ juju status --watch 1s --relations
 ```
 
 The deployment is ready when all the charms are in the `active/idle` state.<br>
-It is normal for `grafana-agent` to remain in waiting state.<br>
-It is also expected that `traefik` goes to the error state (related Traefik [bug](https://github.com/canonical/traefik-k8s-operator/issues/361)).
+It is normal for `grafana-agent` and `traefik` to be in `blocked` state.<br>
 
 Example:
 
 ```console
 ubuntu@host:~/terraform $ juju status
-Model      Controller                  Cloud/Region                Version  SLA          Timestamp
-sdcore  microk8s-localhost  microk8s/localhost  3.6.1    unsupported  09:10:50+01:00
+Model   Controller          Cloud/Region        Version  SLA          Timestamp
+sdcore  microk8s-localhost  microk8s/localhost  3.6.1    unsupported  11:35:07+02:00
 
 App                       Version  Status   Scale  Charm                     Channel        Rev  Address         Exposed  Message
-amf                       1.6.1    active       1  sdcore-amf-k8s            1.6/edge       863  10.152.183.24   no       
-ausf                      1.5.1    active       1  sdcore-ausf-k8s           1.6/edge       676  10.152.183.54   no       
-grafana-agent             0.40.4   blocked      1  grafana-agent-k8s         latest/stable   80  10.152.183.247  no       Missing ['grafana-cloud-config']|['logging-consumer'] for logging-provider; ['grafana-cloud-config']|['send-remote-wr...
-mongodb                            active       1  mongodb-k8s               6/stable        61  10.152.183.233  no       
-nms                       1.1.0    active       1  sdcore-nms-k8s            1.6/edge       799  10.152.183.107  no       
-nrf                       1.6.1    active       1  sdcore-nrf-k8s            1.6/edge       748  10.152.183.179  no       
-nssf                      1.5.1    active       1  sdcore-nssf-k8s           1.6/edge       631  10.152.183.133  no       
-pcf                       1.5.2    active       1  sdcore-pcf-k8s            1.6/edge       670  10.152.183.21   no       
-router                             active       1  sdcore-router-k8s         1.6/edge       437  10.152.183.203  no       
-self-signed-certificates           active       1  self-signed-certificates  latest/stable  155  10.152.183.201  no       
-smf                       1.6.2    active       1  sdcore-smf-k8s            1.6/edge       765  10.152.183.172  no       
-traefik                   2.11.0   error        1  traefik-k8s               latest/stable  203  10.152.183.128  no       hook failed: "ingress-relation-created"
-udm                       1.5.1    active       1  sdcore-udm-k8s            1.6/edge       626  10.152.183.52   no       
-udr                       1.6.1    active       1  sdcore-udr-k8s            1.6/edge       613  10.152.183.236  no       
-upf                       1.4.0    active       1  sdcore-upf-k8s            1.6/edge       678  10.152.183.34   no       
+amf                       1.6.4    active       1  sdcore-amf-k8s            1.6/edge       908  10.152.183.217  no       
+ausf                      1.6.2    active       1  sdcore-ausf-k8s           1.6/edge       713  10.152.183.19   no       
+grafana-agent             0.40.4   blocked      1  grafana-agent-k8s         latest/stable  111  10.152.183.102  no       Missing ['grafana-cloud-config']|['logging-consumer'] for logging-provider; ['grafana-cloud-config']|['send-remote-wr...
+mongodb                            active       1  mongodb-k8s               6/stable        61  10.152.183.18   no       
+nms                       1.1.0    active       1  sdcore-nms-k8s            1.6/edge       849  10.152.183.42   no       
+nrf                       1.6.2    active       1  sdcore-nrf-k8s            1.6/edge       790  10.152.183.234  no       
+nssf                      1.6.1    active       1  sdcore-nssf-k8s           1.6/edge       669  10.152.183.40   no       
+pcf                       1.6.1    active       1  sdcore-pcf-k8s            1.6/edge       710  10.152.183.129  no       
+router                             active       1  sdcore-router-k8s         1.6/edge       464  10.152.183.176  no       
+self-signed-certificates           active       1  self-signed-certificates  1/stable       263  10.152.183.71   no       
+smf                       2.0.2    active       1  sdcore-smf-k8s            1.6/edge       801  10.152.183.81   no       
+traefik                   2.11.0   blocked      1  traefik-k8s               latest/stable  234  10.152.183.244  no       "external_hostname" must be set while using routing mode "subdomain"
+udm                       1.6.1    active       1  sdcore-udm-k8s            1.6/edge       664  10.152.183.241  no       
+udr                       1.6.2    active       1  sdcore-udr-k8s            1.6/edge       645  10.152.183.96   no       
+upf                       2.0.1    active       1  sdcore-upf-k8s            1.6/edge       767  10.152.183.173  no       
 
 Unit                         Workload  Agent  Address       Ports  Message
-amf/0*                       active    idle   10.1.194.224         
-ausf/0*                      active    idle   10.1.194.212         
-grafana-agent/0*             blocked   idle   10.1.194.214         Missing ['grafana-cloud-config']|['logging-consumer'] for logging-provider; ['grafana-cloud-config']|['send-remote-wr...
-mongodb/0*                   active    idle   10.1.194.193         
-nms/0*                       active    idle   10.1.194.217         
-nrf/0*                       active    idle   10.1.194.241         
-nssf/0*                      active    idle   10.1.194.249         
-pcf/0*                       active    idle   10.1.194.201         
-router/0*                    active    idle   10.1.194.255         
-self-signed-certificates/0*  active    idle   10.1.194.219         
-smf/0*                       active    idle   10.1.194.223         
-traefik/0*                   error     idle   10.1.194.251         hook failed: "ingress-relation-created"
-udm/0*                       active    idle   10.1.194.199         
-udr/0*                       active    idle   10.1.194.231         
-upf/0*                       active    idle   10.1.194.240         
+amf/0*                       active    idle   10.1.194.206         
+ausf/0*                      active    idle   10.1.194.235         
+grafana-agent/0*             blocked   idle   10.1.194.208         Missing ['grafana-cloud-config']|['logging-consumer'] for logging-provider; ['grafana-cloud-config']|['send-remote-wr...
+mongodb/0*                   active    idle   10.1.194.237         Primary
+nms/0*                       active    idle   10.1.194.255         
+nrf/0*                       active    idle   10.1.194.213         
+nssf/0*                      active    idle   10.1.194.243         
+pcf/0*                       active    idle   10.1.194.250         
+router/0*                    active    idle   10.1.194.210         
+self-signed-certificates/0*  active    idle   10.1.194.239         
+smf/0*                       active    idle   10.1.194.202         
+traefik/0*                   blocked   idle   10.1.194.230         "external_hostname" must be set while using routing mode "subdomain"
+udm/0*                       active    idle   10.1.194.249         
+udr/0*                       active    idle   10.1.194.245         
+upf/0*                       active    idle   10.1.194.217         
 
 Offer  Application  Charm           Rev  Connected  Endpoint        Interface       Role
-amf    amf          sdcore-amf-k8s  863  0/0        fiveg-n2        fiveg_n2        provider
-nms    nms          sdcore-nms-k8s  799  0/0        fiveg_core_gnb  fiveg_core_gnb  provider
-upf    upf          sdcore-upf-k8s  678  0/0        fiveg_n3        fiveg_n3        provider
+amf    amf          sdcore-amf-k8s  908  0/0        fiveg-n2        fiveg_n2        provider
+nms    nms          sdcore-nms-k8s  849  0/0        fiveg_core_gnb  fiveg_core_gnb  provider
+upf    upf          sdcore-upf-k8s  767  0/0        fiveg_n3        fiveg_n3        provider
 ```
 
 ### Configure the ingress
@@ -221,7 +220,7 @@ The output should look similar to below:
 
 ```console
 ubuntu@host:~/terraform $ microk8s.kubectl -n sdcore get svc | grep "traefik-lb"
-traefik-lb                           LoadBalancer   10.152.183.142   10.0.0.2      80:32435/TCP,443:32483/TCP    11m
+traefik-lb                           LoadBalancer   10.152.183.83    10.0.0.2      80:30462/TCP,443:30163/TCP    9m4s
 ```
 
 In this tutorial, the IP is `10.0.0.2`. Please note it, as we will need it in the next step.
@@ -338,6 +337,26 @@ juju status --watch 1s --relations
 
 At this stage both the `cu` and the `du` applications are expected to be in the `waiting/idle` state and the messages should indicate they're waiting for network configuration.
 
+Example:
+
+```console
+ubuntu@host:~/terraform $ juju status
+Model  Controller          Cloud/Region        Version  SLA          Timestamp
+ran    microk8s-localhost  microk8s/localhost  3.6.1    unsupported  11:43:43+02:00
+
+SAAS  Status  Store  URL
+amf   active  local  admin/sdcore.amf
+nms   active  local  admin/sdcore.nms
+
+App  Version  Status   Scale  Charm           Channel   Rev  Address         Exposed  Message
+cu            waiting      1  oai-ran-cu-k8s  2.2/edge   63  10.152.183.220  no       Waiting for TAC and PLMNs configuration
+du            waiting      1  oai-ran-du-k8s  2.2/edge   84  10.152.183.124  no       Waiting for F1 information
+
+Unit   Workload  Agent  Address       Ports  Message
+cu/0*  waiting   idle   10.1.194.194         Waiting for TAC and PLMNs configuration
+du/0*  waiting   idle   10.1.194.196         Waiting for F1 information
+```
+
 ## 3. Configure the 5G core network through the Network Management System
 
 Retrieve the NMS credentials (`username` and `password`):
@@ -350,16 +369,17 @@ juju show-secret NMS_LOGIN --reveal
 The output looks like this:
 
 ```
-csurgu7mp25c761k2oe0:
-  revision: 1
+cvmg6h7mp25c7619i89g:
+  revision: 2
+  checksum: 68cb0ef846164496a7b4233933c339b667563b1ad93351f1a3e43ceec0dc3d39
   owner: nms
   label: NMS_LOGIN
-  created: 2024-11-20T10:22:49Z
-  updated: 2024-11-20T10:22:49Z
+  created: 2025-04-02T09:28:37Z
+  updated: 2025-04-02T09:41:02Z
   content:
-    password: ',u7=VEE3XK%t'
-    token: ""
-    username: charm-admin-SOOO
+    password: 8lR4jyOKQQz
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDM1OTA0NjEsInVzZXJuYW1lIjoiY2hhcm0tYWRtaW4tRFhRVCIsInJvbGUiOjF9.OPd4zEjNqhxkptRrGeybfSqwU78epk2tz7o69zLQnq8
+    username: charm-admin-DXQT
 ```
 
 Retrieve the NMS address:
@@ -371,7 +391,20 @@ juju run traefik/0 show-proxied-endpoints
 The output should be `http://sdcore-nms.10.0.0.2.nip.io/`.<br>
 Navigate to this address in your browser and use the `username` and `password` to login.
 
-In the Network Management System (NMS), create a network slice with the following attributes:
+### Assign Tracking Area Code (TAC) to the gNodeB
+
+In the Network Management System (NMS) navigate to the `Inventory` tab. Click the `Edit` button next to the integrated gNB name and set `TAC` to `1`:
+
+```{image} ../images/getting_started_gnb_tac.png
+:alt: NMS Inventory
+:align: center
+```
+
+Confirm new `TAC` value by clicking the `Submit` button.
+
+### Create a Network Slice
+
+Navigate to the `Network slices` tab and create a network slice with the following attributes:
 
 - Name: `default`
 - MCC: `001`
@@ -386,7 +419,10 @@ You should see the following network slice created:
 :align: center
 ```
 
-Navigate to the Device Groups page and create a new device group with the following attributes:
+### Create a Device Group
+
+Navigate to the `Device groups` tab and create a device group with the following attributes:
+
 - Name: `device-group`
 - Network Slice: `default`
 - Subscriber IP pool: `172.250.1.0/16`
@@ -406,14 +442,17 @@ You should see the following device group created:
 :align: center
 ```
 
-Navigate to Subscribers and create a new subscriber with the following attributes:
+### Create a Subscriber
+
+Navigate to `Subscribers` tab and click the `Create` button. Fill in the following:
+
 
 - Network Slice: `default`
 - Device Group: `device-group`
 
-Click on the two `Generate` buttons to automatically fill in the values in the form. Note the IMSI, OPC and Key, we are going to use them in the next step.
+Click the two `Generate` buttons to automatically fill in the values in the form. Note the IMSI, OPC, Key and Sequence Number; we are going to use them shortly.
 
-After clicking on the `Submit` button you should see the subscriber created:
+After clicking the `Submit` button you should see the subscriber created:
 
 ```{image} ../images/nms_subscriber.png
 :alt: NMS Subscriber
