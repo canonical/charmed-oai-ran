@@ -46,4 +46,5 @@ Tx
 UE
 UPF
 USRP
+VPN
 VPNs
