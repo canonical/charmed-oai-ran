@@ -10,6 +10,7 @@ DNS
 Ettus
 gNB
 gNodeB
+GTP
 hostname
 Aether
 APIs
@@ -30,9 +31,11 @@ MTU
 observability
 Observability
 OAI
+OCI
 OPC
 QI
 QoS
+Rockcraft
 Ryzen
 SMA
 TAC
@@ -43,3 +46,5 @@ Tx
 UE
 UPF
 USRP
+VPN
+VPNs
