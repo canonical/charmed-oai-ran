@@ -28,6 +28,7 @@ MCC
 MNC
 NMS
 MTU
+Multus
 observability
 Observability
 OAI

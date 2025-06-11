@@ -18,34 +18,38 @@ To complete this tutorial, you will need a machine which meets the following req
 
 ## 1. Deploy Charmed Aether SD-Core
 
-### Install MicroK8s
+## 1. Install Canonical K8s
 
-From your terminal, install MicroK8s:
-
-```console
-sudo snap install microk8s --channel=1.31-strict/stable
-```
-
-Add your user to the `microk8s` group:
+From your terminal, install Canonical K8s and bootstrap it:
 
 ```console
-sudo usermod -a -G snap_microk8s $USER
-newgrp snap_microk8s
+sudo snap install k8s --classic --channel=1.33-classic/stable
+cat << EOF | sudo k8s bootstrap --file -
+containerd-base-dir: /opt/containerd
+cluster-config:
+  network:
+    enabled: true
+  dns:
+    enabled: true
+  load-balancer:
+    enabled: true
+  local-storage:
+    enabled: true
+  annotations:
+    k8sd/v1alpha1/cilium/sctp/enabled: true
+EOF
 ```
 
-Add the community repository MicroK8s addon:
+Add the Multus plugin.
 
 ```console
-microk8s addons repo add community https://github.com/canonical/microk8s-community-addons --reference feat/strict-fix-multus
+sudo k8s kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset-thick.yml
 ```
 
-Enable the following MicroK8s addons. 
 We must give MetalLB an address range that has at least 3 IP addresses for Charmed Aether SD-Core.
 
 ```console
-sudo microk8s enable hostpath-storage
-sudo microk8s enable multus
-sudo microk8s enable metallb:10.0.0.2-10.0.0.4
+sudo k8s set load-balancer.cidrs="10.0.0.2-10.0.0.4"
 ```
 
 ### Bootstrap a Juju controller
@@ -56,10 +60,19 @@ From your terminal, install Juju:
 sudo snap install juju --channel=3.6/stable
 ```
 
+Save the K8s credentials to allow bootstrapping Juju controller.
+
+```console
+mkdir -p ~/.kube
+sudo k8s config > ~/.kube/config
+mkdir -p ~/.local/share/juju/
+sudo k8s config > ~/.local/share/juju/credentials.yaml
+```
+
 Bootstrap a Juju controller:
 
 ```console
-juju bootstrap microk8s
+juju bootstrap k8s
 ```
 
 ```{note}
@@ -165,8 +178,8 @@ Example:
 
 ```console
 ubuntu@host:~/terraform $ juju status
-Model   Controller          Cloud/Region        Version  SLA          Timestamp
-sdcore  microk8s-localhost  microk8s/localhost  3.6.1    unsupported  11:35:07+02:00
+Model   Controller  Cloud/Region  Version  SLA          Timestamp
+sdcore  k8s         k8s           3.6.1    unsupported  11:35:07+02:00
 
 App                       Version  Status   Scale  Charm                     Channel        Rev  Address         Exposed  Message
 amf                       1.6.4    active       1  sdcore-amf-k8s            1.6/edge       908  10.152.183.217  no       
@@ -213,13 +226,13 @@ upf    upf          sdcore-upf-k8s  767  0/0        fiveg_n3        fiveg_n3    
 Get the external IP address of Traefik's `traefik-lb` LoadBalancer service:
 
 ```console
-microk8s.kubectl -n sdcore get svc | grep "traefik-lb"
+sudo k8s kubectl -n sdcore get svc | grep "traefik-lb"
 ```
 
 The output should look similar to below:
 
 ```console
-ubuntu@host:~/terraform $ microk8s.kubectl -n sdcore get svc | grep "traefik-lb"
+ubuntu@host:~/terraform $ sudo k8s kubectl -n sdcore get svc | grep "traefik-lb"
 traefik-lb                           LoadBalancer   10.152.183.83    10.0.0.2      80:30462/TCP,443:30163/TCP    9m4s
 ```
 
@@ -341,8 +354,8 @@ Example:
 
 ```console
 ubuntu@host:~/terraform $ juju status
-Model  Controller          Cloud/Region        Version  SLA          Timestamp
-ran    microk8s-localhost  microk8s/localhost  3.6.1    unsupported  11:43:43+02:00
+Model  Controller  Cloud/Region  Version  SLA          Timestamp
+ran    k8s         k8s           3.6.1    unsupported  11:43:43+02:00
 
 SAAS  Status  Store  URL
 amf   active  local  admin/sdcore.amf
@@ -463,7 +476,7 @@ After clicking the `Submit` button you should see the subscriber created:
 Due to current limitations in the network configuration procedure, it is required to restart the CU Pod after configuring the network.
 This limitation will be addressed in the future.
 To restart the CU Pod execute:
-`microk8s.kubectl -n ran delete pod cu-0`
+`sudo k8s kubectl -n ran delete pod cu-0`
 ```
 
 After adding the network configuration the CU and the DU should change their state to `active/idle`. 
@@ -479,8 +492,8 @@ Output should be similar to:
 
 ```console
 ubuntu@host:~/terraform $ juju status
-Model  Controller          Cloud/Region        Version  SLA          Timestamp
-ran    microk8s-localhost  microk8s/localhost  3.6.1    unsupported  09:29:04+01:00
+Model  Controller  Cloud/Region  Version  SLA          Timestamp
+ran    k8s         k8s           3.6.1    unsupported  09:29:04+01:00
 
 SAAS  Status  Store  URL
 amf   active  local  admin/sdcore.amf
@@ -600,5 +613,5 @@ and `terraform.tf` files.
 Destroy the Juju controller and all its models:
 
 ```console
-juju kill-controller microk8s-localhost
+juju kill-controller k8s
 ```
