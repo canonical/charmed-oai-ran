@@ -122,18 +122,11 @@ resource "juju_model" "sdcore" {
   name = "sdcore"
 }
 
-module "sdcore-router" {
-  source = "git::https://github.com/canonical/sdcore-router-k8s-operator//terraform"
-
-  model      = juju_model.sdcore.name
-  depends_on = [juju_model.sdcore]
-}
-
 module "sdcore" {
   source = "git::https://github.com/canonical/terraform-juju-sdcore//modules/sdcore-k8s"
 
-  model          = juju_model.sdcore.name
-  depends_on     = [module.sdcore-router]
+  model      = juju_model.sdcore.name
+  depends_on = [juju_model.sdcore]
 
   traefik_config = {
     routing_mode = "subdomain"
@@ -189,8 +182,7 @@ mongodb                            active       1  mongodb-k8s               6/s
 nms                       1.1.0    active       1  sdcore-nms-k8s            1.6/edge       849  10.152.183.42   no       
 nrf                       1.6.2    active       1  sdcore-nrf-k8s            1.6/edge       790  10.152.183.234  no       
 nssf                      1.6.1    active       1  sdcore-nssf-k8s           1.6/edge       669  10.152.183.40   no       
-pcf                       1.6.1    active       1  sdcore-pcf-k8s            1.6/edge       710  10.152.183.129  no       
-router                             active       1  sdcore-router-k8s         1.6/edge       464  10.152.183.176  no       
+pcf                       1.6.1    active       1  sdcore-pcf-k8s            1.6/edge       710  10.152.183.129  no    
 self-signed-certificates           active       1  self-signed-certificates  1/stable       263  10.152.183.71   no       
 smf                       2.0.2    active       1  sdcore-smf-k8s            1.6/edge       801  10.152.183.81   no       
 traefik                   2.11.0   blocked      1  traefik-k8s               latest/stable  234  10.152.183.244  no       "external_hostname" must be set while using routing mode "subdomain"
@@ -206,8 +198,7 @@ mongodb/0*                   active    idle   10.1.194.237         Primary
 nms/0*                       active    idle   10.1.194.255         
 nrf/0*                       active    idle   10.1.194.213         
 nssf/0*                      active    idle   10.1.194.243         
-pcf/0*                       active    idle   10.1.194.250         
-router/0*                    active    idle   10.1.194.210         
+pcf/0*                       active    idle   10.1.194.250     
 self-signed-certificates/0*  active    idle   10.1.194.239         
 smf/0*                       active    idle   10.1.194.202         
 traefik/0*                   blocked   idle   10.1.194.230         "external_hostname" must be set while using routing mode "subdomain"
@@ -401,7 +392,7 @@ Retrieve the NMS address:
 juju run traefik/0 show-proxied-endpoints
 ```
 
-The output should be `http://sdcore-nms.10.0.0.2.nip.io/`.<br>
+The output should be `https://sdcore-nms.10.0.0.2.nip.io/`.<br>
 Navigate to this address in your browser and use the `username` and `password` to login.
 
 ### Assign Tracking Area Code (TAC) to the gNodeB
@@ -520,9 +511,10 @@ module "ue" {
   model = juju_model.oai-ran.name
 
   config = {
-    imsi = "001010100007487"                   # Use the IMSI generated in the previous step
-    key  = "5122250214c33e723a5dd523fc145fc0"  # Use the Key generated in the previous step
-    opc  = "981d464c7c52eb6e5036234984ad0bcf"  # Use the OPC generated in the previous step
+    "imsi": "001010100007487",                  # Use the IMSI generated in the previous step
+    "key": "5122250214c33e723a5dd523fc145fc0",  # Use the Key generated in the previous step
+    "opc": "981d464c7c52eb6e5036234984ad0bcf",  # Use the OPC generated in the previous step
+    "simulation-mode": true,
   }
 }
 
@@ -530,11 +522,11 @@ resource "juju_integration" "ue-du" {
   model = juju_model.oai-ran.name
   application {
     name     = module.ue.app_name
-    endpoint = module.ue.requires.fiveg_rfsim
+    endpoint = module.ue.requires.fiveg_rf_config
   }
   application {
     name     = module.du.app_name
-    endpoint = module.du.provides.fiveg_rfsim
+    endpoint = module.du.provides.fiveg_rf_config
   }
 }
 

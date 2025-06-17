@@ -31,7 +31,7 @@ resource "juju_integration" "cu-amf" {
   model = juju_model.oai-ran.name
   application {
     name     = module.cu.app_name
-    endpoint = module.cu.fiveg_n2_endpoint
+    endpoint = module.cu.requires.fiveg_n2
   }
   application {
     offer_url = module.sdcore.amf_fiveg_n2_offer_url
@@ -42,7 +42,7 @@ resource "juju_integration" "cu-nms" {
   model = juju_model.oai-ran.name
   application {
     name     = module.cu.app_name
-    endpoint = module.cu.fiveg_core_gnb_endpoint
+    endpoint = module.cu.requires.fiveg_core_gnb
   }
   application {
     offer_url = module.sdcore.nms_fiveg_core_gnb_offer_url
@@ -71,10 +71,10 @@ resource "juju_integration" "ue-du" {
   model = juju_model.oai-ran.name
   application {
     name     = module.ue.app_name
-    endpoint = module.ue.fiveg_rfsim_endpoint
+    endpoint = module.ue.requires.fiveg_rf_config
   }
   application {
     name     = module.du.app_name
-    endpoint = module.du.fiveg_rfsim_endpoint
+    endpoint = module.du.provides.fiveg_rf_config
   }
 }
