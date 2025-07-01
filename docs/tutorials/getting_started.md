@@ -355,7 +355,7 @@ Example:
 ```console
 ubuntu@host:~/terraform $ juju status
 Model  Controller  Cloud/Region  Version  SLA          Timestamp
-ran    k8s         k8s           3.6.1    unsupported  11:43:43+02:00
+ran    k8s         k8s           3.6.7    unsupported  11:43:43+02:00
 
 SAAS  Status  Store  URL
 amf   active  local  admin/sdcore.amf
@@ -493,19 +493,19 @@ Output should be similar to:
 ```console
 ubuntu@host:~/terraform $ juju status
 Model  Controller  Cloud/Region  Version  SLA          Timestamp
-ran    k8s         k8s           3.6.1    unsupported  09:29:04+01:00
+ran    k8s         k8s           3.6.7    unsupported  09:58:23+02:00
 
 SAAS  Status  Store  URL
 amf   active  local  admin/sdcore.amf
 nms   active  local  admin/sdcore.nms
 
 App  Version  Status  Scale  Charm           Channel   Rev  Address         Exposed  Message
-cu            active      1  oai-ran-cu-k8s  2.2/edge   55  10.152.183.152  no
-du            active      1  oai-ran-du-k8s  2.2/edge   64  10.152.183.80   no
+cu            active      1  oai-ran-cu-k8s  2.2/edge   74  10.152.183.233  no       
+du            active      1  oai-ran-du-k8s  2.2/edge  109  10.152.183.254  no       
 
-Unit   Workload  Agent  Address       Ports  Message
-cu/0*  active    idle   10.1.194.205         
-du/0*  active    idle   10.1.194.250
+Unit   Workload  Agent  Address     Ports  Message
+cu/0*  active    idle   10.1.0.196         
+du/0*  active    idle   10.1.0.231
 ```
 
 ## 5. Deploy Charmed OAI RAN UE Simulator
