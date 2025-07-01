@@ -107,7 +107,7 @@ terraform {
   required_providers {
     juju = {
       source  = "juju/juju"
-      version = ">= 0.12.0"
+      version = ">= 0.20.0"
     }
   }
 }
@@ -122,11 +122,18 @@ resource "juju_model" "sdcore" {
   name = "sdcore"
 }
 
+module "sdcore-router" {
+  source = "git::https://github.com/canonical/sdcore-router-k8s-operator//terraform"
+
+  model      = juju_model.sdcore.name
+  depends_on = [juju_model.sdcore]
+}
+
 module "sdcore" {
   source = "git::https://github.com/canonical/terraform-juju-sdcore//modules/sdcore-k8s"
 
   model      = juju_model.sdcore.name
-  depends_on = [juju_model.sdcore]
+  depends_on = [module.sdcore-router]
 
   traefik_config = {
     routing_mode = "subdomain"
@@ -172,44 +179,46 @@ Example:
 ```console
 ubuntu@host:~/terraform $ juju status
 Model   Controller  Cloud/Region  Version  SLA          Timestamp
-sdcore  k8s         k8s           3.6.1    unsupported  11:35:07+02:00
+sdcore  k8s         k8s           3.6.7    unsupported  09:45:02+02:00
 
 App                       Version  Status   Scale  Charm                     Channel        Rev  Address         Exposed  Message
-amf                       1.6.4    active       1  sdcore-amf-k8s            1.6/edge       908  10.152.183.217  no       
-ausf                      1.6.2    active       1  sdcore-ausf-k8s           1.6/edge       713  10.152.183.19   no       
-grafana-agent             0.40.4   blocked      1  grafana-agent-k8s         latest/stable  111  10.152.183.102  no       Missing ['grafana-cloud-config']|['logging-consumer'] for logging-provider; ['grafana-cloud-config']|['send-remote-wr...
-mongodb                            active       1  mongodb-k8s               6/stable        61  10.152.183.18   no       
-nms                       1.1.0    active       1  sdcore-nms-k8s            1.6/edge       849  10.152.183.42   no       
-nrf                       1.6.2    active       1  sdcore-nrf-k8s            1.6/edge       790  10.152.183.234  no       
-nssf                      1.6.1    active       1  sdcore-nssf-k8s           1.6/edge       669  10.152.183.40   no       
-pcf                       1.6.1    active       1  sdcore-pcf-k8s            1.6/edge       710  10.152.183.129  no    
-self-signed-certificates           active       1  self-signed-certificates  1/stable       263  10.152.183.71   no       
-smf                       2.0.2    active       1  sdcore-smf-k8s            1.6/edge       801  10.152.183.81   no       
-traefik                   2.11.0   blocked      1  traefik-k8s               latest/stable  234  10.152.183.244  no       "external_hostname" must be set while using routing mode "subdomain"
-udm                       1.6.1    active       1  sdcore-udm-k8s            1.6/edge       664  10.152.183.241  no       
-udr                       1.6.2    active       1  sdcore-udr-k8s            1.6/edge       645  10.152.183.96   no       
-upf                       2.0.1    active       1  sdcore-upf-k8s            1.6/edge       767  10.152.183.173  no       
+amf                       1.6.4    active       1  sdcore-amf-k8s            1.6/edge       937  10.152.183.27   no       
+ausf                      1.6.2    active       1  sdcore-ausf-k8s           1.6/edge       741  10.152.183.81   no       
+grafana-agent             0.40.4   blocked      1  grafana-agent-k8s         1/stable       116  10.152.183.232  no       Missing ['grafana-cloud-config']|['logging-consumer'] for logging-provider; ['grafana-cloud-config']|['send-remote-wr...
+mongodb                            active       1  mongodb-k8s               6/stable        61  10.152.183.151  no       
+nms                       1.8.5    active       1  sdcore-nms-k8s            1.6/edge       889  10.152.183.87   no       
+nrf                       1.6.2    active       1  sdcore-nrf-k8s            1.6/edge       825  10.152.183.106  no       
+nssf                      1.6.1    active       1  sdcore-nssf-k8s           1.6/edge       685  10.152.183.158  no       
+pcf                       1.6.1    active       1  sdcore-pcf-k8s            1.6/edge       729  10.152.183.56   no       
+router                             active       1  sdcore-router-k8s         1.6/edge       482  10.152.183.192  no       
+self-signed-certificates           active       1  self-signed-certificates  1/stable       308  10.152.183.63   no       
+smf                       2.0.2    active       1  sdcore-smf-k8s            1.6/edge       829  10.152.183.222  no       
+traefik                   2.11.0   blocked      1  traefik-k8s               latest/stable  236  10.152.183.208  no       "external_hostname" must be set while using routing mode "subdomain"
+udm                       1.6.1    active       1  sdcore-udm-k8s            1.6/edge       691  10.152.183.37   no       
+udr                       1.6.2    active       1  sdcore-udr-k8s            1.6/edge       671  10.152.183.95   no       
+upf                       2.0.1    active       1  sdcore-upf-k8s            1.6/edge       797  10.152.183.253  no       
 
-Unit                         Workload  Agent  Address       Ports  Message
-amf/0*                       active    idle   10.1.194.206         
-ausf/0*                      active    idle   10.1.194.235         
-grafana-agent/0*             blocked   idle   10.1.194.208         Missing ['grafana-cloud-config']|['logging-consumer'] for logging-provider; ['grafana-cloud-config']|['send-remote-wr...
-mongodb/0*                   active    idle   10.1.194.237         Primary
-nms/0*                       active    idle   10.1.194.255         
-nrf/0*                       active    idle   10.1.194.213         
-nssf/0*                      active    idle   10.1.194.243         
-pcf/0*                       active    idle   10.1.194.250     
-self-signed-certificates/0*  active    idle   10.1.194.239         
-smf/0*                       active    idle   10.1.194.202         
-traefik/0*                   blocked   idle   10.1.194.230         "external_hostname" must be set while using routing mode "subdomain"
-udm/0*                       active    idle   10.1.194.249         
-udr/0*                       active    idle   10.1.194.245         
-upf/0*                       active    idle   10.1.194.217         
+Unit                         Workload  Agent  Address     Ports  Message
+amf/0*                       active    idle   10.1.0.253         
+ausf/0*                      active    idle   10.1.0.33          
+grafana-agent/0*             blocked   idle   10.1.0.215         Missing ['grafana-cloud-config']|['logging-consumer'] for logging-provider; ['grafana-cloud-config']|['send-remote-wr...
+mongodb/0*                   active    idle   10.1.0.217         Primary
+nms/0*                       active    idle   10.1.0.209         
+nrf/0*                       active    idle   10.1.0.186         
+nssf/0*                      active    idle   10.1.0.32          
+pcf/0*                       active    idle   10.1.0.254         
+router/0*                    active    idle   10.1.0.28          
+self-signed-certificates/0*  active    idle   10.1.0.249         
+smf/0*                       active    idle   10.1.0.100         
+traefik/0*                   blocked   idle   10.1.0.11          "external_hostname" must be set while using routing mode "subdomain"
+udm/0*                       active    idle   10.1.0.141         
+udr/0*                       active    idle   10.1.0.108         
+upf/0*                       active    idle   10.1.0.221       
 
 Offer  Application  Charm           Rev  Connected  Endpoint        Interface       Role
-amf    amf          sdcore-amf-k8s  908  0/0        fiveg-n2        fiveg_n2        provider
-nms    nms          sdcore-nms-k8s  849  0/0        fiveg_core_gnb  fiveg_core_gnb  provider
-upf    upf          sdcore-upf-k8s  767  0/0        fiveg_n3        fiveg_n3        provider
+amf    amf          sdcore-amf-k8s  937  0/0        fiveg-n2        fiveg_n2        provider
+nms    nms          sdcore-nms-k8s  889  0/0        fiveg_core_gnb  fiveg_core_gnb  provider
+upf    upf          sdcore-upf-k8s  797  0/0        fiveg_n3        fiveg_n3        provider
 ```
 
 ### Configure the ingress
@@ -353,8 +362,8 @@ amf   active  local  admin/sdcore.amf
 nms   active  local  admin/sdcore.nms
 
 App  Version  Status   Scale  Charm           Channel   Rev  Address         Exposed  Message
-cu            waiting      1  oai-ran-cu-k8s  2.2/edge   63  10.152.183.220  no       Waiting for TAC and PLMNs configuration
-du            waiting      1  oai-ran-du-k8s  2.2/edge   84  10.152.183.124  no       Waiting for F1 information
+cu            waiting      1  oai-ran-cu-k8s  2.2/edge   74  10.152.183.220  no       Waiting for TAC and PLMNs configuration
+du            waiting      1  oai-ran-du-k8s  2.2/edge  109  10.152.183.124  no       Waiting for F1 information
 
 Unit   Workload  Agent  Address       Ports  Message
 cu/0*  waiting   idle   10.1.194.194         Waiting for TAC and PLMNs configuration

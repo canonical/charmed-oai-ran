@@ -65,6 +65,9 @@ module "ue" {
   source = "git::https://github.com/canonical/oai-ran-ue-k8s-operator//terraform"
 
   model = juju_model.oai-ran.name
+  config = {
+    "simulation-mode": true,
+  }
 }
 
 resource "juju_integration" "ue-du" {
