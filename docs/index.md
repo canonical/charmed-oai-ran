@@ -1,6 +1,6 @@
 # Charmed OAI RAN
 
-> **:warning: Deprecation Notice!**
+> **⚠️ Deprecation Notice!**
 >
 > This project is deprecated and will not receive further updates. Please refer to the upstream [OAI](https://openairinterface.org/) project to continue using OAI.
 
