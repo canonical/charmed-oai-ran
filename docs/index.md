@@ -1,5 +1,9 @@
 # Charmed OAI RAN
 
+> **:warning: Deprecation Notice!**
+>
+> This project is deprecated and will not receive further updates. Please refer to the upstream [OAI](https://openairinterface.org/) project to continue using OAI.
+
 OAI RAN is an open source 5G radio network distributed by the Open Air Interface Software Alliance. OAI RAN is an implementation of the Open Radio Access Network (O-RAN) architecture, which is a disaggregated RAN architecture. It includes the Centralized Unit (CU), and the Distributed Unit (DU).
 
 OAI RAN addresses the need for a cost-effective open source 5G radio network, as opposed to traditionally costly mobile networking software. It supports various configurations, including standalone and non-standalone modes, and can be deployed in a variety of environments, from private networks to public networks.
